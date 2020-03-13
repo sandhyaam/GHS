@@ -1,0 +1,251 @@
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<html>
+<style>
+    .tablecss {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    .tablecss td,
+    .tablecss th {
+        border: 1px solid #ddd;
+        padding: 8px;
+    }
+
+    .tablecss tr:nth-child(odd) {
+        background-color: #f2f2f2;
+    }
+
+    .tablecss tr:hover {
+        background-color: #ddd;
+    }
+
+    .tablecss th {
+        padding-top: 12px;
+        padding-bottom: 12px;
+        text-align: center;
+        background-color: lavender;
+        color: black;
+        font-weight: bold;
+    }
+</style>
+
+<body onload="loadData()"><br><br><br>
+    <center>
+        <table id="table" class="tablecss" style="width:95%;"></table>
+    </center>
+
+    <div class="modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content" style="background-color:rgb(236, 221, 221)">
+                <div class="modal-header" style="background-color:rgb(172, 76, 172)">
+                    <button type="button" style="background-color:white" class="close"
+                        data-dismiss="modal">&times;</button>
+                    <center>
+                        <font style="color:white">
+                            <h4>Edit Details</h4>
+                        </font>
+                    </center>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-2"></div>
+                        <div class="col-md-6">
+                            <input type="hidden" name="id" id="id" class="form-control" required>
+                        </div><br>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-3"></div>
+                        <div class="col-sm-2"><label>Nursary Name:</label></div>
+                        <div class="col-sm-3"><input type="text" placeholder="Name" id="nursary" class="form-control">
+                        </div>
+                        <div class="col-sm-4"></div>
+                    </div><br>
+                    <div class="row">
+                        <div class="col-sm-3"></div>
+                        <div class="col-sm-2"><label>Plant Type</label>
+                        </div>
+                        <div class="col-sm-3">
+                            <select id="plantType" class="form-control">
+                                <option value="-select-">-select-</option>
+                                <option value="Fruit Plants">Fruit Plants</option>
+                                <option value="Lucky Plants">Lucky Plants</option>
+                                <option value="Medicinal Plants">Medicinal Plants</option>
+                            </select></div>
+                        <div class="col-sm-4"></div>
+                    </div><br>
+                    <div class="row">
+                        <div class="col-sm-3"></div>
+                        <div class="col-sm-2"><label>Plant Name</label></div>
+                        <div class="col-sm-3"><input type="text" placeholder="Name" id="plantName" class="form-control">
+                        </div>
+                        <div class="col-sm-4"></div>
+                    </div><br>
+                    <div class="row">
+                        <div class="col-sm-3"></div>
+                        <div class="col-sm-2"><label>Rate</label></div>
+                        <div class="col-sm-3"><input type="text" id="rate" placeholder="enter rate"
+                                class="form-control"></div>
+                        <div class="col-sm-4"></div>
+                    </div><br>
+                    <div class="row">
+                        <div class="col-sm-3"></div>
+                        <div class="col-sm-2"><label>Image</label></div>
+                        <div class="col-sm-3"><img src="" id="image" alt="Smiley face" height="42" width="42">
+                        </div><input type="file" id="file" required>
+                    </div>
+                    <div class="col-sm-4"></div>
+                </div><br>
+                <div class="row">
+                    <div class="col-sm-3"></div>
+                    <div class="col-sm-2"><input type="button" id="btnadd" onclick="plantsUpdate()"
+                            data-dismiss="modal" class="btn btn-success" value="Update" /></div>&nbsp;
+                    <div class="col-sm-2"><button type="button" id="cancel" style="display: none" onclick="cancel()"
+                            class="btn btn-success">Reset</button></div>
+                    <div class="col-sm-3"></div>
+                </div><br>
+            </div>
+        </div>
+    </div>
+    </div>
+
+</body>
+<script>
+    const nursary = sessionStorage.getItem('nursary');
+    const nursaryId = sessionStorage.getItem("nursaryid");
+
+    function performAjax(httpMethod, url, params) {
+        const myPromise = new Promise((resolve, reject) => {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    resolve(JSON.parse(this.responseText));
+                }
+                if (this.status == 500) {
+                    reject({ error: true, message: "ServerError" });
+                }
+                if (this.status == 404) {
+                    reject({ error: true, message: "Resource not found" });
+                }
+            };
+            xhttp.open(httpMethod, url, true);
+            xhttp.setRequestHeader("Content-Type", "application/json");
+            params ? xhttp.send(params) : xhttp.send();
+        });
+        return myPromise;
+    }
+
+    function loadData() {
+        const getItemPromise = performAjax("GET", `http://localhost:5000/Nursary/getPlantData?nursary=${nursaryId}`);
+        getItemPromise
+            .then((plantsList) => {
+                loadPlantsData(plantsList);
+            })
+            .catch(err => {
+                alert(err.message);
+            })
+    }
+
+
+    function loadPlantsData(plants) {
+        const tableHeader = `<tr><th style="text-align:center">Sno</th><th style="height:20%;text-align:center">Nursary</th><th style="height:20%;text-align:center">PlantType</th><th style="height:20%;text-align:center">PlantName</th><th style="height:20%;text-align:center">rate</th><th style="height:20%;text-align:center">Image</th><th>Actions</th></tr>`;
+        if (plants.length > 0) {
+            let tableRows = plants.map((plant, index) => {
+                let editButton = `<a class="fa fa-edit" id="${plant.id}"   style="color:blue; font-size:22px;" onclick="edit(event)" data-toggle="modal" data-target="#myModal"></a>`;
+                let deleteButton = `<a id="${plant.id}" class="fa fa-trash" style="color:blue; font-size:22px;" onclick="deleteFile(event)"></a>`;
+                return `<tr><td>${index + 1}</td><td>${plant.nursary}</td><td>${plant.plantType}</td><td>${plant.plantName}</td><td>${plant.rate}</td><td><img src="${plant.image}" height="30" width="50"></td><td align="center">${editButton}&nbsp;&nbsp;&nbsp;${deleteButton}</td></tr>`;
+            });
+            document.getElementById("table").innerHTML = `<table  border="2"> ${tableHeader}${tableRows.join('')}</table>`;
+        }
+        else {
+            tableRows = `<tr><td colspan="18" align="center">No Data Found</td></tr>`;
+            document.getElementById("table").innerHTML = `${tableHeader}${tableRows}`;
+        }
+    }
+
+    function edit(event) {
+        event.preventDefault();
+        console.log(event.target.id);
+        const getItemPromise = performAjax("GET", `http://localhost:5000/Nursary/editPlant/${event.target.id}`);
+        getItemPromise
+            .then((data) => {
+                const plant = JSON.parse(JSON.stringify(data));
+                plant.map(rec => {
+                    document.getElementById("id").value = rec.id;
+                    console.log(rec.id )
+                    document.getElementById("nursary").value = rec.nursary;
+                    document.getElementById("plantType").value = rec.plantType;
+                    document.getElementById("plantName").value = rec.plantName;
+                    document.getElementById("rate").value = rec.rate;
+                    document.getElementById("image").src = rec.image;
+                })
+
+            })
+            .catch(err => {
+                alert(err.message);
+            })
+    }
+
+    function plantsUpdate() {
+        const id = document.getElementById("id").value;
+        const plantType = document.getElementById("plantType").value;
+        const plantName = document.getElementById("plantName").value;
+        const rate = document.getElementById("rate").value;
+        const image = document.getElementById("file").files;
+        if (image.length > 0) {
+            var imageToLoad = image[0];
+            var imageReader = new FileReader();
+            imageReader.onload = function (fileLoadedEvent) {
+                const filepath = fileLoadedEvent.target.result;
+                const getSendFilePromise = performAjax(
+                    "PUT",
+                    `http://localhost:5000/Nursary/updatePlant/${id}`,
+                    JSON.stringify({ plantType, plantName, rate, image: filepath }));
+                getSendFilePromise
+                    .then((sendFilePromise) => {
+                        loadData(sendFilePromise);
+                        alert('Image upload  Successfully');
+
+                    })
+                    .catch(err => {
+                        alert(err.message);
+                    })
+            }
+            imageReader.readAsDataURL(imageToLoad);
+        }
+        else {
+            const getPromise = performAjax(
+                "PUT",
+                `http://localhost:5000/Nursary/updatePlant/${id}`,
+                JSON.stringify({ plantType, plantName, rate })
+            );
+            getPromise
+                .then((UniPromise) => {
+                    loadData(UniPromise);
+                    alert('Update Successfully Completed');
+
+                })
+                .catch(err => {
+                    alert(err.message);
+                })
+        }
+    }
+
+
+    function deleteFile(event) {
+        event.preventDefault();
+        const deletePromise = performAjax("DELETE", `http://localhost:5000/Nursary/delelePlant/${event.target.id}`);
+        deletePromise
+            .then((remaininglist) => {
+                loadData();
+            })
+            .catch(err => {
+                alert(err.message);
+            })
+    }
+
+</script>

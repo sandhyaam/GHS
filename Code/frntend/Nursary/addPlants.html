@@ -1,0 +1,142 @@
+<html>
+
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css"
+        integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+    <style>
+        .nav-item:hover {
+            background-color: black;
+        }
+    </style>
+</head>
+
+<body onload="getNursarydeatils()"><br><br>
+    <div class="row">
+        <div class="col-md-3"></div>
+        <div class="col-md-2">
+            <div class="col-md-3"><input type="hidden" name="id" id="id" class="form-control" required>
+            </div>
+            <div class="col-md-4"></div>
+        </div><br>
+    </div>
+    <div class="row">
+        <div class="col-sm-4"></div>
+        <div class="col-sm-2"><label>Nursary Name:</label></div>
+        <div class="col-sm-2"><input type="text" disabled="false" placeholder=" nursary Name" id="nursary"
+                class="form-control"></div>
+        <div class="col-sm-4"></div>
+    </div><br>
+    <div class="row">
+        <div class="col-sm-4"></div>
+        <div class="col-sm-2"><label>Plant Type</label>
+        </div>
+        <div class="col-sm-2">
+            <select id="plantType" class="form-control">
+                <option value="--select--" disabled selected>---select---</option>
+                <option value="Fruit Plants">Fruit Plants</option>
+                <option value="Lucky Plants">Lucky Plants</option>
+                <option value="Medicinal Plants">Medicinal Plants</option>
+            </select></div>
+        <div class="col-sm-4"></div>
+    </div><br>
+    <div class="row">
+        <div class="col-sm-4"></div>
+        <div class="col-sm-2"><label>Plant Name</label></div>
+        <div class="col-sm-2"><input type="text" placeholder="Name" id="plantName" class="form-control"></div>
+        <div class="col-sm-4"></div>
+    </div><br>
+    <div class="row">
+        <div class="col-sm-4"></div>
+        <div class="col-sm-2"><label>Rate</label></div>
+        <div class="col-sm-2"><input type="text" id="rate" placeholder="enter rate" class="form-control"></div>
+        <div class="col-sm-4"></div>
+    </div><br>
+    <div class="row">
+        <div class="col-sm-4"></div>
+        <div class="col-sm-2"><label>Image</label></div>
+        <div class="col-sm-3" id="imagediv" style="display: none"><img src="" id="image"
+                style="width:100px;height:100px;border-radius:50px">
+        </div>
+        <div class="col-sm-2"><input type="file" id="file" required></div>
+        <div class="col-sm-4"></div>
+    </div><br>
+    <div class="row">
+        <div class="col-sm-5"></div>
+        <div class="col-sm-2"><button type="button" onclick="AddPlants()" class="btn btn-primary">Submit</button>
+        </div>
+        <div class="col-sm-2"><button type="button" onclick="cancel()" class="btn btn-success ">CANCEL</button></div>
+        <div class="col-sm-3"></div>
+    </div>
+</body>
+<script>
+    const nursary = sessionStorage.getItem('nursary');
+    const nursaryId = sessionStorage.getItem("nursaryid");
+    function performAjax(httpMethod, url, params) {
+        const myPromise = new Promise((resolve, reject) => {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+
+                    resolve(this.responseText);
+                }
+                if (this.status == 500) {
+                    reject({ error: true, message: "ServerError" });
+                }
+                if (this.status == 404) {
+                    reject({ error: true, message: "Resource not found" });
+                }
+            };
+            xhttp.open(httpMethod, url, true);
+            xhttp.setRequestHeader("Content-Type", "application/json");
+            params ? xhttp.send(params) : xhttp.send();
+        });
+        return myPromise;
+    }
+
+    function getNursarydeatils() {
+        document.getElementById("nursary").value = nursary;
+    }
+
+    function AddPlants() {
+        const nursary = document.getElementById("nursary").value;
+        const plantType = document.getElementById("plantType").value;
+        const plantName = document.getElementById("plantName").value;
+        const rate = document.getElementById("rate").value;
+        const image = document.getElementById("file").files;
+        if (image.length > 0) {
+            var fileToLoad = image[0];
+            var fileReader = new FileReader();
+            fileReader.onload = function (fileLoadedEvent) {
+                const filepath = fileLoadedEvent.target.result;
+                const getSendFilePromise = performAjax(
+                    "POST",
+                    `http://localhost:5000/Nursary/addPlant`,
+                    JSON.stringify({ nursary: nursaryId, plantType, plantName, rate, image: filepath })
+                );
+                getSendFilePromise
+                    .then((sendFilePromise) => {
+                        alert('Image upload  Successfully');
+                        cancel();
+                    })
+                    .catch(err => {
+                        alert(err.message);
+                    })
+            }
+            fileReader.readAsDataURL(fileToLoad);
+        }
+    }
+
+    function cancel() {
+        event.preventDefault();
+        document.getElementById("nursary").value = "";
+        document.getElementById("plantType").value = "";
+        document.getElementById("plantName").value = "";
+        document.getElementById("rate").value = "";
+        document.getElementById("image").value = "";
+    }
+</script>
+
+</html>

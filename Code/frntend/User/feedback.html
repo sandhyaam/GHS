@@ -1,0 +1,144 @@
+<html>
+
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+</head>
+<script>
+    $(function () {
+        $("#search").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "http://localhost:5000/User/nurseryNames",
+                    type: "GET",
+                    data: request,
+                    success: function (data) {
+                        response($.map(data, function (el) {
+                            return {
+                                label: el.nursary,
+                                value: el._id
+                               
+                            };
+                        }));
+                    }
+                });
+            },
+            minLength: 1,
+            focus: function (event, ui) {
+                this.value = ui.item.label;
+                event.preventDefault();
+            },
+            select: function (event, ui) {
+                this.value = ui.item.label;
+                $(this).next("input").val(ui.item.value);
+                event.preventDefault();
+            }
+        });
+
+    });
+</script>
+
+<script type="text/javascript">
+    let userName = sessionStorage.getItem('userName');
+    let userid = sessionStorage.getItem("id");
+    function performAjax(httpMethod, url, params) {
+        const myPromise = new Promise((resolve, reject) => {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    resolve(this.responseText);
+                }
+                if (this.status == 500) {
+                    reject({ error: true, message: "ServerError" });
+                }
+                if (this.status == 404) {
+                    reject({ error: true, message: "Resource not found" });
+                }
+            };
+            xhttp.open(httpMethod, url, true);
+            xhttp.setRequestHeader("Content-Type", "application/json");
+            params ? xhttp.send(params) : xhttp.send();
+        });
+        return myPromise;
+    }
+    function LoadData() {
+        document.getElementById("user").value = userName;
+        const getPromise = performAjax("GET", `http://localhost:5000/User/nurseryNames`);
+        getPromise
+            .then((details) => {
+            })
+            .catch(err => {
+                alert(err.message);
+            })
+    }
+
+    function UserFeedback() {
+        const nursary = document.getElementById("search").value;
+        const feedback = document.getElementById("feedback").value;
+        const addPromise = performAjax(
+            "POST", "http://localhost:5000/User/userFeedBack",
+            JSON.stringify({ user: userid, nursary, feedback })
+        );
+        addPromise
+            .then(newList => {
+                alert("succefully submitted ur feedback");
+                cancel();
+            })
+            .catch(err => {
+                alert(err.message);
+            });
+    }
+    function cancel() {
+        document.getElementById("search").value = "";
+        document.getElementById("feedback").value = "";
+
+    }
+</script>
+
+<body onload="LoadData()">
+    <input type="hidden" placeholder="enter ur name" id="result" class="form-control">
+    <div>
+        <center>
+            <h1 style="color: #273746">Feedback</h1>
+    </div>
+    </center><br>
+    <div class="row">
+        <div class="col-sm-4"></div>
+        <div class="col-sm-2">
+            <label style="margin-top: 8px">User Name</label></div>
+        <div class="col-sm-2">
+            <input type="text" placeholder="enter ur name" id="user" disabled="false" class="form-control"></div>
+        <div class="col-sm-4"></div>
+    </div><br>
+    <div class="row">
+        <div class="col-sm-4"></div>
+        <div class="col-sm-2">
+            <label style="margin-top: 8px">Nursary Name:</label></div>
+        <div class="col-sm-2">
+            <input type="text" placeholder="search Nursary name" id="search" class="form-control"></div>
+        <div class="col-sm-4"></div>
+    </div><br>
+    <div class="row">
+        <div class="col-sm-4"></div>
+        <div class="col-sm-2">
+            <label style="margin-top: 8px">feedback</label></div>
+        <div class="col-sm-2">
+            <textarea name="enter feedback" id="feedback" class="form-control"></textarea></div>
+        <div class="col-sm-4"></div>
+    </div><br><br>
+    <div class="row">
+        <div class="col-sm-5"></div>
+        <div class="col-sm-1"><input type="button" id="btnadd" onclick="UserFeedback()" class="btn btn-success"
+                value="Add" /></div>&nbsp;
+        <div class="col-sm-1"><button type="button" id="cancel" style="display: none" onclick="cancel()"
+                class="btn btn-success">Reset</button></div>
+        <div class="col-sm-5"></div>
+    </div><br>
+
+    </div>
+</body>
+
+</html>

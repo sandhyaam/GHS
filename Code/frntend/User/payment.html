@@ -1,0 +1,146 @@
+<html>
+
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <style>
+        .form-control {
+            border: 2px solid black;
+        }
+    </style>
+</head>
+<script>
+    const userid = sessionStorage.getItem("id");
+    const userName = sessionStorage.getItem('userName');
+    const amount = sessionStorage.getItem("amount");
+    function performAjax(httpMethod, url, params) {
+        const myPromise = new Promise((resolve, reject) => {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    resolve(JSON.parse(this.responseText));
+
+                }
+                if (this.status == 500) {
+                    reject({ error: true, message: "ServerError" });
+                }
+                if (this.status == 404) {
+                    reject({ error: true, message: "Resource not found" });
+                }
+            };
+            xhttp.open(httpMethod, url, true);
+            xhttp.setRequestHeader("Content-Type", "application/json");
+            params ? xhttp.send(params) : xhttp.send();
+        });
+        return myPromise;
+    }
+    function getdeatils() {
+        document.getElementById("user").value = userName;
+        document.getElementById("amount").value = amount;
+
+    }
+    function payment() {
+        const orderId = Math.floor((Math.random() * 1000) + 1);
+        const amount = document.getElementById("amount").value;
+        const cardType = document.getElementById("cardType").value;
+        const cardHolderName = document.getElementById("cardHolderName").value;
+        const cardNumber = document.getElementById("cardNumber").value;
+        const cvv = document.getElementById("cvv").value;
+        const date = document.getElementById("date").value;
+        const email = sessionStorage.getItem("email");
+        const addPromise = performAjax(
+            "POST", "http://localhost:5000/User/paymentdetails",
+            JSON.stringify({ user: userid, orderId, cardType, cardHolderName, amount, cardNumber, cvv, date, status: 'Pending', email })
+        );
+        addPromise
+            .then(newList => {
+                alert("Order Placed Successfully");
+                cancel();
+            })
+            .catch(err => {
+                alert(err.message);
+            });
+
+    }
+
+    function cancel() {
+        event.preventDefault();
+        document.getElementById("amount").value = "";
+        document.getElementById("cardType").value = "";
+        document.getElementById("cardHolderName").value = "";
+        document.getElementById("cardNumber").value = "";
+        document.getElementById("cvv").value = "";
+        document.getElementById("date").value = "";
+    }
+</script>
+
+<body onload="getdeatils()" style="font-family:verdena;">
+    <br><input type="hidden" name="id" class="form-control" id="id">
+    <div class="row">
+        <div class="col-sm-3"></div>
+        <div class="col-sm-2"><label for="username">Username:</label></div>
+        <div class="col-sm-3">
+            <input type="text" name="uname" disabled="false" class="form-control" id="user"
+                placeholder="enter user name" required></div>
+        <div class="col-sm-2"></div>
+    </div><br>
+    <div class="row">
+        <div class="col-sm-3"></div>
+        <div class="col-sm-2"><label for="">TotalAmount:</label></div>
+        <div class="col-sm-3"><input type="text" name="totalamount" disabled="false" class="form-control" id="amount"
+                placeholder="" required></div>
+        <div class="col-sm-4"></div>
+    </div><br>
+    <div class="row">
+        <div class="col-sm-3"></div>
+        <div class="col-sm-2"><label>CardType:</label></div>
+        <div class="col-sm-3">
+            <select value="" id="cardType" class="form-control" required>
+                <option value="CreditCard">CreditCard</option>
+                <option value="DebitCard">DebitCard</option>
+            </select>
+        </div>
+        <div class="col-sm-4"></div>
+    </div><br>
+    <div class="row">
+        <div class="col-sm-3"></div>
+        <div class="col-sm-2"><label>CardHolderName:</label></div>
+        <div class="col-sm-3"><input type="text" name="password" class="form-control" id="cardHolderName" placeholder=""
+                required></div>
+        <div class="col-sm-4"></div>
+    </div><br>
+    <div class="row">
+        <div class="col-sm-3"></div>
+        <div class="col-sm-2"><label>CardNumber:</label></div>
+        <div class="col-sm-3"><input type="text" name="password" class="form-control" id="cardNumber" placeholder=""
+                required></div>
+        <div class="col-sm-4"></div>
+    </div><br>
+    <div class="row">
+        <div class="col-sm-3"></div>
+        <div class="col-sm-2"><label>CvvNUmber:</label></div>
+        <div class="col-sm-3"><input type="text" name="password" class="form-control" id="cvv" placeholder="" required>
+        </div>
+        <div class="col-sm-4"></div>
+    </div><br>
+    <div class="row">
+        <div class="col-sm-3"></div>
+        <div class="col-sm-2"><label>ExpireDate:</label></div>
+        <div class="col-sm-3"><input type="date" name="password" class="form-control" id="date" required></div>
+        <div class="col-sm-4"></div>
+    </div><br>
+    <div class="row">
+        <div class="col-sm-5"></div>
+        <div class="col-sm-3">
+            <button type="button" onclick="payment()" class="btn btn-success">Submit</button></div>
+        <button type="reset" onclick="cancel()" style="display: none" class="btn btn-success">reset</button>
+        <div class="col-sm-4"></div>
+    </div><br>
+
+</body>
+
+</html>

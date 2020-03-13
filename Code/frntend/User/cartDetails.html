@@ -1,0 +1,293 @@
+<html>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<style>
+    .tablecss {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    .tablecss td,
+    .tablecss th {
+        border: 1px solid #ddd;
+        padding: 8px;
+    }
+
+    .tablecss tr:nth-child(odd) {
+        background-color: #f2f2f2;
+    }
+
+    .tablecss tr:hover {
+        background-color: #ddd;
+    }
+
+    .tablecss th {
+        padding-top: 12px;
+        padding-bottom: 12px;
+        text-align: center;
+        background-color: lavender;
+        color: black;
+        font-weight: bold;
+    }
+
+    .button {
+        background-color: #4CAF50;
+        /* Green */
+        border: none;
+        color: white;
+        padding: 5px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        -webkit-transition-duration: 0.4s;
+        /* Safari */
+        transition-duration: 0.4s;
+        cursor: pointer;
+    }
+
+    .button1 {
+        background-color: white;
+        color: black;
+        border: 2px solid #4CAF50;
+    }
+
+    .button1:hover {
+        background-color: #4CAF50;
+        color: white;
+    }
+</style>
+
+</head>
+
+<body onload="loadData()"><br><br><br>
+    <center>
+        <table id="table" class="tablecss" style="width:95%;"></table>
+    </center><br>
+    <a href="http://localhost:3000/User/payments" id="order" onclick="placeorder(event)" class="button button1">Place
+        Order</a> <input type="hidden" name="total" id="amount" class="form-control" required>
+
+    <div class="modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content" style="background-color:rgb(236, 221, 221)">
+                <div class="modal-header" style="background-color:rgb(172, 76, 172)">
+                    <button type="button" style="background-color:white" class="close"
+                        data-dismiss="modal">&times;</button>
+                    <center>
+                        <font style="color:white">
+                            <h4>Edit Details</h4>
+                        </font>
+                    </center>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-2"></div>
+                        <div class="col-md-6">
+                            <input type="hidden" name="id" id="id" class="form-control" required>
+
+
+                        </div><br>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-3"></div>
+                        <div class="col-sm-2"><label>Nursary Name:</label></div>
+                        <div class="col-sm-3"><input type="text" disabled="false" placeholder="Name" id="nursary"
+                                class="form-control"></div>
+                        <div class="col-sm-4"></div>
+                    </div><br>
+                    <div class="row">
+                        <div class="col-sm-3"></div>
+                        <div class="col-sm-2"><label>Plant Type</label>
+                        </div>
+                        <div class="col-sm-3"><input type="text" disabled="false" placeholder="Name" id="plantType"
+                            class="form-control">
+                            </div>
+                        <div class="col-sm-4"></div>
+                    </div><br>
+                    <div class="row">
+                        <div class="col-sm-3"></div>
+                        <div class="col-sm-2"><label>Plant Name</label></div>
+                        <div class="col-sm-3"><input type="text" disabled="false" placeholder="Name" id="plantName"
+                                class="form-control">
+                        </div>
+                        <div class="col-sm-4"></div>
+                    </div><br>
+                    <div class="row">
+                        <div class="col-sm-3"></div>
+                        <div class="col-sm-2"><label>Rate</label></div>
+                        <div class="col-sm-3"><input type="text" disabled="false" id="rate" placeholder="enter rate"
+                                class="form-control"></div>
+                        <div class="col-sm-4"></div>
+                    </div><br>
+                    <div class="row">
+                        <div class="col-sm-3"></div>
+                        <div class="col-sm-2"><label>quantity</label></div>
+                        <div class="col-sm-3"><input type="number" id="quantity" onchange="multiamount()"
+                                class="form-control">
+                        </div>
+                        <div class="col-sm-4"></div>
+                    </div><br>
+                    <div class="row">
+                        <div class="col-sm-3"></div>
+                        <div class="col-sm-2"><label>Amount</label></div>
+                        <div class="col-sm-3"><input type="number" disabled="false" id="amountt" class="form-control">
+                        </div>
+                        <div class="col-sm-4"></div>
+                    </div><br>
+                    <div class="row">
+                        <div class="col-sm-3"></div>
+                        <div class="col-sm-2"><input type="button" id="btnadd" onclick="plantsUpdate(event)"
+                                data-dismiss="modal" class="btn btn-success" value="Update" /></div>&nbsp;
+                        <div class="col-sm-2"><button type="button" id="cancel" onclick="cancel()"
+                                class="btn btn-success">Reset</button></div>
+                        <div class="col-sm-3"></div>
+                    </div><br>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+<script>
+    const userid = sessionStorage.getItem("id");
+    function performAjax(httpMethod, url, params) {
+        const myPromise = new Promise((resolve, reject) => {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    resolve(JSON.parse(this.responseText));
+                }
+                if (this.status == 500) {
+                    reject({ error: true, message: "ServerError" });
+                }
+                if (this.status == 404) {
+                    reject({ error: true, message: "Resource not found" });
+                }
+            };
+            xhttp.open(httpMethod, url, true);
+            xhttp.setRequestHeader("Content-Type", "application/json");
+            params ? xhttp.send(params) : xhttp.send();
+        });
+        return myPromise;
+    }
+    function loadData() {
+        const getUsersPromise = performAjax("GET", `http://localhost:5000/User/cartdetails?user=${userid}`);
+        getUsersPromise
+            .then((itemsList) => {
+                loadPlantsData(itemsList);
+            })
+            .catch(err => {
+                alert(err.message);
+            })
+
+    }
+  
+
+    function loadPlantsData(plants) {
+        const tableHeader = `<tr><th style="text-align:center">Sno</th><th style="height:20%;text-align:center">Nursary</th><th style="height:20%;text-align:center">plantName</th><th style="height:20%;text-align:center">plantType</th><th style="height:20%;text-align:center">Rate</th><th style="height:20%;text-align:center">Quantity</th><th style="height:20%;text-align:center">Amount</th><th>Actions</th></tr>`;
+        if (plants.length > 0) {
+            let tableRows = plants.map((plant, index) => {
+            let edit = `<a class="fa fa-edit" id="${plant.id}"   style="color:blue; font-size:22px;" onclick="edit(event)" data-toggle="modal" data-target="#myModal"></a>`;
+            let del = `<a id="${plant.id}" class="fa fa-trash" style="color:blue; font-size:22px;" onclick="deleteFile(event)"></a>`;
+    return `<tr><td>${index + 1}</td><td>${plant.nursary}</td><td>${plant.plantType}</td><td>${plant.plantName}</td><td>${plant.rate}</td><td>${plant.quantity}</td><td>${plant.amount}</td><td>${edit} ${del}</td></tr>`;
+            });
+            document.getElementById("table").innerHTML = `<table  border="2"> ${tableHeader}${tableRows.join('')}</table>`;
+        }
+        else {
+            tableRows = `<tr><td colspan="18" align="center">No Data Found</td></tr>`;
+            document.getElementById("table").innerHTML = `${tableHeader}${tableRows}`;
+        }
+    }
+
+    function edit(event) {
+        event.preventDefault();
+        const getPromise = performAjax("GET", `http://localhost:5000/User/editCartDetails/${event.target.id}`);
+        getPromise
+            .then((data) => {
+                const plant = JSON.parse(JSON.stringify(data));
+                plant.map(editRecord => {
+                    document.getElementById("id").value = editRecord.id;
+                    document.getElementById("nursary").value = editRecord.nursary;
+                    document.getElementById("plantName").value = editRecord.plantName;
+                    document.getElementById("plantType").value = editRecord.plantType;
+                    document.getElementById("rate").value = editRecord.rate;
+                    document.getElementById("quantity").value = editRecord.quantity;
+                    document.getElementById("amountt").value = editRecord.amount;
+                })
+
+            })
+            .catch(err => {
+                alert(err.message);
+            })
+    }
+    function multiamount() {
+        const rate = document.getElementById("rate").value;
+        const quantity = document.getElementById("quantity").value;
+        const amounttotal = rate * quantity;
+        const amount = document.getElementById("amountt").value = amounttotal;
+    }
+
+    function placeorder(event) {
+        event.preventDefault();
+        const getUsersPromise = performAjax("GET", `http://localhost:5000/User/placeOrderDetails?user=${userid}`);
+        getUsersPromise
+            .then(plantList => {
+                var nums = JSON.parse(JSON.stringify(plantList));
+                var amount = 0;
+                for (var i = 0; i < nums.length; i++) {
+                    var keys = parseInt(nums[i].amount);
+                    if (isNaN(keys)) {
+                        continue;
+                    }
+                    amount += keys;
+                }
+                sessionStorage.setItem("amount", amount);
+                window.open("payments", "_self");
+            })
+            .catch(err => {
+                alert(err.message);
+            })
+    }
+
+    function plantsUpdate() {
+        const id = document.getElementById("id").value;
+        console.log(id);
+        const quantity = document.getElementById("quantity").value;
+        const amount = document.getElementById("amountt").value;
+        const getUniPromise = performAjax(
+            "PUT",
+            `http://localhost:5000/User/cartUpdate/${id}`,
+            JSON.stringify({ quantity, amount })
+        );
+        getUniPromise
+            .then((UniPromise) => {
+                loadData();
+                alert('Update Successfully Completed');
+
+            })
+            .catch(err => {
+                alert(err.message);
+            })
+
+    }
+
+    function deleteFile(event) {
+        event.preventDefault();
+        const deletePromise = performAjax("DELETE", `http://localhost:5000/User/deleteCart/${event.target.id}`);
+        deletePromise
+            .then((remaininglist) => {
+                loadData();
+            })
+            .catch(err => {
+                alert(err.message);
+            })
+    }
+
+</script>
+
+</html>

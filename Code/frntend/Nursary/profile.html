@@ -1,0 +1,173 @@
+<html>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+<br>
+
+<body onload="getData()">
+    <center>
+        <div class="row">
+            <div class="col-md-3"></div>
+            <div class="col-md-4"><label style="color:purple">Nursary Profile</label></div>
+            <div class="col-md-3"></div>
+            <div class="col-md-2"><input type="hidden" name="id" id="id" class="form-control" required>
+            </div>
+        </div><br>
+
+        <div class="row">
+            <div class="col-md-3"></div>
+            <div class="col-md-2"><label>First Name:</label></div>
+            <div class="col-md-3"> <input type="text" placeholder="enter ur FirstName" id="firstName"
+                    class="form-control">
+            </div>
+            <div class="col-md-4"></div>
+        </div><br>
+        <div class="row">
+            <div class="col-md-3"></div>
+            <div class="col-md-2"><label>Last Name:</label></div>
+            <div class="col-md-3"><input type="text" placeholder="enter ur LastName" id="lastName" class="form-control">
+            </div>
+            <div class="col-md-4"></div>
+        </div><br>
+        <div class="row">
+            <div class="col-md-3"></div>
+            <div class="col-md-2"><label>User Name:</label></div>
+            <div class="col-md-3"> <input type="text" placeholder="enter ur userName" id="userName"
+                    class="form-control">
+            </div>
+            <div class="col-md-4"></div>
+        </div><br>
+        <div class="row">
+            <div class="col-md-3"></div>
+            <div class="col-md-2"><label>Mobile No:</label></div>
+            <div class="col-md-3"><input type="text" placeholder="enter phoneno" id="phoneNo" class="form-control">
+            </div>
+            <div class="col-md-4"></div>
+        </div><br>
+        <div class="row">
+            <div class="col-md-3"></div>
+            <div class="col-md-2"><label>Email Id:</label></div>
+            <div class="col-md-3"><input type="text" placeholder="enter ur email" id="email" class="form-control">
+            </div>
+            <div class="col-md-4"></div>
+        </div><br>
+        <div class="row">
+            <div class="col-sm-3"></div>
+            <div class="col-sm-2"><label>Nursary Name:</label></div>
+            <div class="col-sm-3"><input type="text" id="nursary" placeholder=" Nursary Name"
+                    class="form-control">
+            </div>
+            <div class="col-sm-4"></div>
+        </div><br>
+        <div class="row">
+            <div class="col-sm-3"></div>
+            <div class="col-sm-2"><label>Mobile Number:</label></div>
+            <div class="col-sm-3"><input type="text" id="contactNo" placeholder="Mobile Number" class="form-control">
+            </div>
+            <div class="col-sm-4"></div>
+        </div><br>
+        <div class="row">
+            <div class="col-sm-3"></div>
+            <div class="col-sm-2"><label>Address:</label></div>
+            <div class="col-sm-3"><textarea name="Address" id="address" placeholder="Address"
+                    class="form-control"></textarea></div>
+            <div class="col-sm-4"></div>
+        </div><br>
+        <div class="row">
+            <div class="col-md-4"></div>
+            <div class="col-md-4"><label>Status</label><br>
+                <input type="radio" disabled="false" name="status" id="active" value="Active" required>Active
+                <input type="radio" disabled="false" name="status" id="de-active" value="De-Active" required>De-Active
+            </div>
+            <div class="col-md-4"></div>
+            <br>
+
+        </div><br>
+        <div class="row">
+            <div class="col-sm-5"></div>
+            <div class="col-sm-1"><input type="button" id="btnadd" onclick="updateProfile()" class="btn btn-success"
+                    value="Add" /></div>&nbsp;
+            <div class="col-sm-1"><button type="button" id="cancel" onclick="cancel()"
+                    class="btn btn-success">Reset</button></div>
+            <div class="col-sm-5"></div>
+        </div><br>
+        <div class="modal-footer" style="border: none">
+
+        </div>
+        </div>
+    </center>
+</body>
+<script>
+    const userName = sessionStorage.getItem("userName");
+    const nursaryId = sessionStorage.getItem("nursaryid");
+    function performAjax(httpMethod, url, params) {
+        const myPromise = new Promise((resolve, reject) => {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    resolve(this.responseText);
+                }
+                if (this.status == 500) {
+                    reject({ error: true, message: "ServerError" });
+                }
+                if (this.status == 404) {
+                    reject({ error: true, message: "Resource not found" });
+                }
+            };
+            xhttp.open(httpMethod, url, true);
+            xhttp.setRequestHeader("Content-Type", "application/json");
+            params ? xhttp.send(params) : xhttp.send();
+        });
+        return myPromise;
+    }
+    function getData() {
+        document.getElementById("userName").value = userName;
+        const getUsersPromise = performAjax("GET", `http://localhost:5000/Nursary/Profile?userName=${userName}`);
+        getUsersPromise
+            .then((data) => {
+                const user = JSON.parse(data)
+                user.map(rec => {
+                    document.getElementById("firstName").value = rec.firstName;
+                    document.getElementById("lastName").value = rec.lastName;
+                    document.getElementById("userName").value = rec.userName;
+                    document.getElementById("phoneNo").value = rec.phoneNo;
+                    document.getElementById("email").value = rec.email;
+                    document.getElementById("nursary").value = rec.nursary;
+                    document.getElementById("contactNo").value = rec.contactNo;
+                    document.getElementById("address").value = rec.address;
+                    rec.status === 'De-Active' ? document.getElementById("de-active").checked = true : document.getElementById("active").checked = true;
+
+                });
+            })
+            .catch(err => {
+                alert(err.message);
+            })
+    }
+
+    function updateProfile() {
+        const id = document.getElementById("id").value;
+        const fName = document.getElementById("firstName").value;
+        const lName = document.getElementById("lastName").value;
+        const uName = document.getElementById("userName").value;
+        const phNo = document.getElementById("phoneNo").value;
+        const emaill = document.getElementById("email").value;
+        const nursary = document.getElementById("nursary").value;
+        const contactNo = document.getElementById("contactNo").value;
+        const address = document.getElementById("address").value;
+        const status = document.getElementById("de-active").checked ? "De-Active" : "Active";
+        const getUpdatePromise = performAjax(
+            "PUT",
+            `http://localhost:5000/Nursary/updateProfile/${id}`,
+            JSON.stringify({ fName, lName, uName, phNo, emaill, nursary, contactNo, address, status })
+        );
+        getUpdatePromise
+            .then((updatePromise) => {
+                alert('Details Updated');
+            })
+            .catch(err => {
+                alert(err.message);
+            })
+    }
+</script>
+
+</html>

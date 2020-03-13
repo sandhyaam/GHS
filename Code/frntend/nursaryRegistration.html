@@ -1,0 +1,146 @@
+<html>
+
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css"
+        integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+</head>
+<body>
+    <br>
+    <center>
+        <div class="row">
+            <div class="col-md-4"></div>
+            <div class="col-md-4"><label style="color:purple"> <h4>NURSARY PERSONAL DETAILS</h4></label></div>
+            <div class="col-md-4"></div>
+        </div><br>
+        <div class="row">
+            <div class="col-md-3"></div>
+            <div class="col-md-2">
+                <div class="col-md-3"><input type="hidden" name="id" id="id" class="form-control" required>
+                </div>
+                <div class="col-md-4"></div>
+            </div><br>
+        </div>
+        <div class="row">
+            <div class="col-sm-3"></div>
+            <div class="col-sm-2"><label for="">First Name:</label>
+                <input type="text" name="firstName"  class="form-control" id="firstName" placeholder="enter ur FirstName" 
+                    required>
+            </div>
+            <div class="col-sm-2"><label for="">Last Name:</label>
+                <input type="text" name="lastName" class="form-control" id="lastName" placeholder="enter ur LastName" required>
+            </div>
+            <div class="col-sm-2"><label for="">User Name:</label>
+                <input type="text" name="userName" class="form-control" id="userName" placeholder="enter ur userName" required>
+            </div>
+            <div class="col-sm-3"></div>
+        </div><br>
+        <div class="row">
+            <div class="col-sm-3"></div>
+            <div class="col-sm-2"><label for="">Contact No:</label>
+                <input type="number" name="phoneNo"  class="form-control" id="phoneNo" placeholder="enter ur phoneno" 
+                    required>
+            </div>
+            <div class="col-sm-2"><label for="">Email Id:</label>
+                <input type="text" name="email" class="form-control" id="email" placeholder="enter ur email" required>
+            </div>
+            <div class="col-sm-2"><label for="">Nursary Name:</label>
+                <input type="text" name="nursary" class="form-control" id="nursary" placeholder="Nursary Name" required>
+            </div>
+            <div class="col-sm-3"></div>
+        </div><br>
+        <div class="row">
+            <div class="col-sm-3"></div>
+            <div class="col-sm-2"><label>Mobile Number:</label></div>
+            <div class="col-sm-3"><input type="text" id="contactNo" placeholder="Mobile Number" class="form-control">
+            </div>
+            <div class="col-sm-4"></div>
+        </div><br>
+        <div class="row">
+            <div class="col-sm-3"></div>
+            <div class="col-sm-2"><label>Address:</label></div>
+            <div class="col-sm-3"><textarea name="Address" id="address" placeholder="Address"
+                    class="form-control"></textarea></div>
+            <div class="col-sm-4"></div>
+        </div><br>
+        <div class="row">
+            <div class="col-sm-5"></div>
+            <div class="col-sm-1"><input type="button" id="btnadd" onclick="nursaryRegistration()"
+                    class="btn btn-success" value="Add" /></div>&nbsp;
+            <div class="col-sm-1"><button type="button" id="cancel" style="display: none" onclick="cancel()"
+                    class="btn btn-success">Reset</button></div>
+            <div class="col-sm-5"></div>
+        </div><br>
+        <div class="modal-footer" style="border: none">
+
+        </div>
+        </div>
+    </center>
+</body>
+
+
+<script>
+    function performAjax(httpMethod, url, params) {
+        const myPromise = new Promise((resolve, reject) => {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+
+                    resolve(this.responseText);
+                }
+                if (this.status == 500) {
+                    reject({ error: true, message: "ServerError" });
+                }
+                if (this.status == 404) {
+                    reject({ error: true, message: "Resource not found" });
+                }
+            };
+            xhttp.open(httpMethod, url, true);
+            xhttp.setRequestHeader("Content-Type", "application/json");
+            params ? xhttp.send(params) : xhttp.send();
+        });
+        return myPromise;
+    }
+    function nursaryRegistration() {
+        const id = document.getElementById("id").value;
+        const firstName = document.getElementById("firstName").value;
+        const lastName = document.getElementById("lastName").value;
+        const userName = document.getElementById("userName").value;
+        const password = Math.floor((Math.random() * 1000) + 1);
+        const phoneNo = document.getElementById("phoneNo").value;
+        const email = document.getElementById("email").value;
+        const nursary = document.getElementById("nursary").value;
+        const contactNo = document.getElementById("contactNo").value;
+        const address = document.getElementById("address").value;
+        const status = 'De-Active';
+        const addPromise = performAjax(
+            "POST", "http://localhost:5000/Nursary/nursaryRegistration",
+            JSON.stringify({ firstName, lastName, userName, password, phoneNo, email, nursary, contactNo, address, status })
+        );
+        addPromise
+            .then(newList => {
+                alert("succefully added");
+                cancel();
+            })
+            .catch(err => {
+                alert(err.message);
+            });
+
+    }
+
+    function cancel() {
+        event.preventDefault();
+        document.getElementById("firstName").value = "";
+        document.getElementById("lastName").value = "";
+        document.getElementById("userName").value = "";
+        document.getElementById("phoneNo").value = "";
+        document.getElementById("email").value = "";
+        document.getElementById("nursary").value = "";
+        document.getElementById("contactNo").value = "";
+        document.getElementById("address").value = "";
+    }
+</script>
+
+</html>

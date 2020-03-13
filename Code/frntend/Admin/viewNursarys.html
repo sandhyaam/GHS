@@ -1,0 +1,257 @@
+<html>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<style>
+    .tablecss {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    .tablecss td,
+    .tablecss th {
+        border: 1px solid #ddd;
+        padding: 8px;
+    }
+
+    .tablecss tr:nth-child(odd) {
+        background-color: #f2f2f2;
+    }
+
+    .tablecss tr:hover {
+        background-color: #ddd;
+    }
+
+    .tablecss th {
+        padding-top: 12px;
+        padding-bottom: 12px;
+        text-align: center;
+        background-color: lavender;
+        color: black;
+        font-weight: bold;
+    }
+</style>
+
+<body onload="loadData()">
+    <center>
+        <table id="table" class="tablecss" style="width:95%;"></table>
+    </center>
+
+    <div class="modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content" style="background-color:rgb(236, 221, 221)">
+                <div class="modal-header" style="background-color:rgb(172, 76, 172)">
+                    <button type="button" style="background-color:white" class="close"
+                        data-dismiss="modal">&times;</button>
+                    <center>
+                        <font style="color:white">
+                            <h4>Edit Details</h4>
+                        </font>
+                    </center>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-3"></div>
+                        <div class="col-md-2">
+                            <div class="col-md-3"><input type="hidden" name="id" id="id" class="form-control" required>
+                            </div>
+                            <div class="col-md-4"></div>
+                        </div><br>
+                        <div class="row">
+                            <div class="col-md-3"></div>
+                            <div class="col-md-2"><label>First Name:</label></div>
+                            <div class="col-md-3"> <input type="text" disabled="false" placeholder="enter ur FirstName"
+                                    id="firstName" class="form-control">
+                            </div>
+                            <div class="col-md-4"></div>
+                        </div><br>
+                        <div class="row">
+                            <div class="col-md-3"></div>
+                            <div class="col-md-2"><label>Last Name:</label></div>
+                            <div class="col-md-3"><input type="text" disabled="false" placeholder="enter ur LastName"
+                                    id="lastName" class="form-control">
+                            </div>
+                            <div class="col-md-4"></div>
+                        </div><br>
+                        <div class="row">
+                            <div class="col-md-3"></div>
+                            <div class="col-md-2"><label>User Name:</label></div>
+                            <div class="col-md-3"> <input type="text" disabled="false" placeholder="enter ur userName"
+                                    id="userName" class="form-control">
+                            </div>
+                            <div class="col-md-4"></div>
+                        </div><br>
+                        <div class="row">
+                            <div class="col-md-3"></div>
+                            <div class="col-md-2"><label>Mobile No:</label></div>
+                            <div class="col-md-3"><input type="number" disabled="false" placeholder="enter phoneno"
+                                    id="phoneNo" class="form-control"></div>
+                            <div class="col-md-4"></div>
+                        </div><br>
+                        <div class="row">
+                            <div class="col-md-3"></div>
+                            <div class="col-md-2"><label>Email Id:</label></div>
+                            <div class="col-md-3"><input type="text" disabled="false" placeholder="enter ur email"
+                                    id="email" class="form-control"></div>
+                            <div class="col-md-4"></div>
+                        </div><br>
+                        <div class="row">
+                            <div class="col-sm-3"></div>
+                            <div class="col-sm-2"><label>Nursary Name:</label></div>
+                            <div class="col-sm-3"><input type="text" disabled="false" id="nursary"
+                                    placeholder=" Nursary Name" class="form-control">
+                            </div>
+                            <div class="col-sm-4"></div>
+                        </div><br>
+                        <div class="row">
+                            <div class="col-sm-3"></div>
+                            <div class="col-sm-2"><label>Mobile Number:</label></div>
+                            <div class="col-sm-3"><input type="text" disabled="false" id="contactNo"
+                                    placeholder="Mobile Number" class="form-control"></div>
+                            <div class="col-sm-4"></div>
+                        </div><br>
+                        <div class="row">
+                            <div class="col-sm-3"></div>
+                            <div class="col-sm-2"><label>Address:</label></div>
+                            <div class="col-sm-3"><textarea name="Address" disabled="false" id="address"
+                                    placeholder="Address" class="form-control"></textarea></div>
+                            <div class="col-sm-4"></div>
+                        </div><br>
+                        <div class="row">
+                            <div class="col-md-2"></div>
+                            <div class="col-md-3"><label>Status</label><br>
+                                <input type="radio" name="status" id="active" value="Active" required>Active
+                                <input type="radio" name="status" id="de-active" value="De-Active" required>De-Active
+                            </div>
+                            <div class="col-md-3">
+                                <div class="col-md-4"></div>
+                            </div><br>
+
+                        </div><br>
+                        <div class="row">
+                            <div class="col-sm-3"></div>
+                            <div class="col-sm-2"><input type="button" id="btnadd" onclick="NursaryUpdate(event)"
+                                    data-dismiss="modal" class="btn btn-success" value="Update" /></div>&nbsp;
+                            <div class="col-sm-2"><button type="button" id="cancel" onclick="cancel()"
+                                    class="btn btn-success">Reset</button></div>
+                            <div class="col-sm-3"></div>
+                        </div><br>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+
+    function performAjax(httpMethod, url, params) {
+        const myPromise = new Promise((resolve, reject) => {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    resolve(this.responseText);
+                }
+                if (this.status == 500) {
+                    reject({ error: true, message: "ServerError" });
+                }
+                if (this.status == 404) {
+                    reject({ error: true, message: "Resource not found" });
+                }
+            };
+            xhttp.open(httpMethod, url, true);
+            xhttp.setRequestHeader("Content-Type", "application/json");
+            params ? xhttp.send(params) : xhttp.send();
+        });
+        return myPromise;
+    }
+
+    function loadData() {
+        const getPromise = performAjax("GET", "http://localhost:5000/Admin/getNurseryData");
+        getPromise
+            .then((nursaryList) => {
+                loadNursaryData(nursaryList);
+            })
+            .catch(err => {
+                alert(err.message);
+            })
+    }
+
+    function loadNursaryData(records) {
+        const nursarys = JSON.parse(records);
+        const tableHeader = `<tr><th style="text-align:center">Sno</th><th style="height:20%;text-align:center">FirstName</th><th style="height:20%;text-align:center">LastName</th><th style="height:20%;text-align:center">UserName</th><th style="height:20%;text-align:center">MobileNo</th><th style="height:20%;text-align:center">EmailId</th><th style="height:20%;text-align:center">Nursary Name</th><th style="height:20%;text-align:center">ContactNo</th><th style="height:20%;text-align:center">Address</th><th style="height:20%;text-align:center">Actions</th></tr>`;
+        let tableRows = nursarys.map((nursary, index) => {
+            let editButton = `<a class="fa fa-edit" id="${nursary._id}"   style="color:blue; font-size:22px;" onclick="editRecords(event)" data-toggle="modal" data-target="#myModal"></a>`;
+            return `<tr><td>${index + 1}</td><td>${nursary.firstName}</td><td>${nursary.lastName}</td><td>${nursary.userName}</td><td>${nursary.phoneNo}</td><td>${nursary.email}</td><td>${nursary.nursary}</td><td>${nursary.contactNo}</td><td>${nursary.address}</td><td>&nbsp;${editButton}&nbsp;</td></tr>`;
+        });
+        document.getElementById("table").innerHTML = `<table  border="2"> ${tableHeader}${tableRows.join('')}</table>`;
+    }
+
+    function editRecords(event) {
+        event.preventDefault();
+        const getPromise = performAjax("GET", `http://localhost:5000/Admin/editNurseryData/${event.target.id}`);
+        getPromise
+            .then((data) => {
+                const nursary = JSON.parse(data);
+                [nursary].map(editRecord => {
+                    document.getElementById("id").value = editRecord._id;
+                    document.getElementById("firstName").value = editRecord.firstName;
+                    document.getElementById("lastName").value = editRecord.lastName;
+                    document.getElementById("userName").value = editRecord.userName;
+                    document.getElementById("phoneNo").value = editRecord.phoneNo;
+                    document.getElementById("email").value = editRecord.email;
+                    document.getElementById("nursary").value = editRecord.nursary;
+                    document.getElementById("contactNo").value = editRecord.contactNo;
+                    document.getElementById("address").value = editRecord.address;
+                    document.getElementById("de-active").checked = editRecord.de - active;
+                })
+
+            })
+            .catch(err => {
+                alert(err.message);
+            })
+
+    }
+
+
+    function NursaryUpdate() {
+        const id = document.getElementById("id").value;
+        const firstName = document.getElementById("firstName").value;
+        const lastName = document.getElementById("lastName").value;
+        const userName = document.getElementById("userName").value;
+        const phoneNo = document.getElementById("phoneNo").value;
+        const email = document.getElementById("email").value;
+        const nursary = document.getElementById("nursary").value;
+        const status = document.getElementById("de-active").checked ? "De-Active" : "Active";
+        const getUniPromise = performAjax(
+            "PUT",
+            `http://localhost:5000/Admin/updateNurseryData/${id}`,
+            JSON.stringify({ firstName, lastName, userName, nursary, phoneNo, email, status })
+        );
+        getUniPromise
+            .then((UniPromise) => {
+                loadData();
+                alert('Update Successfully Completed');
+                cancel();
+            })
+            .catch(err => {
+                alert(err.message);
+            })
+    }
+
+    function cancel() {
+        event.preventDefault();
+        document.getElementById("firstName").value = "";
+        document.getElementById("lastName").value = "";
+        document.getElementById("userName").value = "";
+        document.getElementById("phoneNo").value = "";
+        document.getElementById("email").checked = "";
+        document.getElementById("nursary").value = "";
+        document.getElementById("de-active").value = "";
+    }
+
+</script>
+
+</html>

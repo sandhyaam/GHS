@@ -1,0 +1,131 @@
+<html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+
+<head>
+
+    <style>
+        .form-control {
+            border-radius: 15px;
+        }
+
+        .tablecss {
+            font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        .tablecss td,
+        .tablecss th {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        .tablecss tr:nth-child(odd) {
+            background-color: #f2f2f2;
+        }
+
+        .tablecss tr:hover {
+            background-color: #ddd;
+        }
+
+        .tablecss th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: center;
+            background-color: lavender;
+            color: black;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<script>
+    const userid = sessionStorage.getItem('id');
+    const email=sessionStorage.getItem("email");
+    function performAjax(httpMethod, url, params) {
+        const myPromise = new Promise((resolve, reject) => {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    resolve(JSON.parse(this.responseText));
+
+                }
+                if (this.status == 500) {
+                    reject({ error: true, message: "ServerError" });
+                }
+                if (this.status == 404) {
+                    reject({ error: true, message: "Resource not found" });
+                }
+            };
+            xhttp.open(httpMethod, url, true);
+            xhttp.setRequestHeader("Content-Type", "application/json");
+            params ? xhttp.send(params) : xhttp.send();
+        });
+        return myPromise;
+    }
+
+    function LoadData() {
+        const getdata = performAjax("GET", `http://localhost:5000/User/getOrderDetails?user=${userid}&status`);
+        getdata
+            .then((details) => {
+                ViewOrderDetails(details);
+            })
+            .catch(err => {
+                alert(err.message);
+            })
+    }
+
+    function ViewOrderDetails(records) {
+        const tableHeader = `<tr><th style="text-align:center">Sno</th><th style="height:20%;text-align:center">UserName</th><th style="height:20%;text-align:center">OrderId</th><th style="height:20%;text-align:center">Amount</th><th style="height:20%;text-align:center">Date</th><th style="height:20%;text-align:center">Status</th><th>Actions</th></tr>`;
+        if (records.length > 0) {
+            let tableRow = records.map((plant, index) => {
+                let cancelButton = `<a class="fa fa-edit" style="color:blue;cursor: pointer;"  onclick="CancelItems('${plant.id}','${plant.status}','${plant.orderId}','${plant.amount}')">Cancel</a>`;
+                return `<tr><td>${index + 1}</td><td>${plant.user}</td><td>${plant.orderId}</td><td>${plant.amount}</td><td>${plant.date}</td><td>${plant.status}</td><td align="center">${cancelButton}&nbsp; </td></tr>`;
+            });
+            document.getElementById("viewtable").innerHTML = `<table  class="scripted table" border="2">${tableHeader}${tableRow.join('')}</table>`;
+        }
+
+        else {
+            tableRow = `<tr><td colspan="18" align="center">No Data Found</td></tr>`;
+            document.getElementById("viewtable").innerHTML = `${tableHeader}${tableRow}`;
+        }
+    }
+
+    function CancelItems(id,status,orderId,amount) {
+        if(status=="Pending"){
+            document.getElementById("id").value = id
+        const getUpdatePromise = performAjax(
+            "PUT",
+            `http://localhost:5000/User/cancelOrder/${id}`,
+            JSON.stringify({ status: 'Cancel',email,orderId,amount })
+        );
+        getUpdatePromise
+            .then((updatePromise) => {
+                alert('Order Canceled');
+                LoadData(updatePromise);
+            })
+            .catch(err => {
+                alert(err.message);
+            })
+        }
+        else{
+            alert("unable to cancel this order");
+        }
+    }
+   
+</script>
+
+<body onload="LoadData()">
+    <br>
+    <br>
+    <br>
+    <center>
+        <table id=viewtable border="1" class="tablecss" style="width: 1000px;"></table>
+    </center>
+    <input type="hidden" name="id" class="form-control" id="id">
+    <br>
+</body>
+</html>
